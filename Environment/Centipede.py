@@ -17,25 +17,25 @@ class Centipede:
         self.numOfRounds = rounds
 
         self.payoffs = np.matrix(np.zeros((2, legs + 1)))
-        for i in range(1, legs + 1):
-            if (i % 2) == 0:
-                self.payoffs[0, i] = 2 ^ (i - 1)
-                self.payoffs[1, i] = 2 ^ (i + 1)
+        for i in range(0, legs + 1):
+            if (i % 2) != 0:
+                self.payoffs[0, i] = 2 ** (i)
+                self.payoffs[1, i] = 2 ** (i + 2)
             else:
-                self.payoffs[1, i] = 2 ^ (i - 1)
-                self.payoffs[0, i] = 2 ^ (i + 1)
+                self.payoffs[1, i] = 2 ** (i)
+                self.payoffs[0, i] = 2 ** (i + 2)
 
     def get_next_state(self, leg, round, action):
 
         # if TAKE was made or PASS was made in the last leg - return next round state
-        if action == 'TAKE' | leg == self.numOfLegs:
+        if action == 'TAKE' or leg == self.numOfLegs:
             return 1, round + 1
 
         else:
             return leg + 1, round
 
     def get_payoff_player0(self, leg):
-        return self.payoffs[0, leg]
+        return self.payoffs[0, leg - 1]
 
     def get_payoff_player1(self, leg):
-        return self.payoffs[1, leg]
+        return self.payoffs[1, leg - 1]
