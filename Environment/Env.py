@@ -1,6 +1,10 @@
 from Centipede import Centipede
 from Agents.PassAgent import PassAgent
 from Agents.TakeAgent import TakeAgent
+from Agents.RLAgent import RLAgent
+from Constants import take_action
+import numpy as np
+
 
 # SETUP ---------------------------------------------------
 
@@ -9,9 +13,19 @@ rounds = 10
 current_leg = 1
 current_round = 1
 history = []
+Q = np.matrix(np.zeros([rounds * legs, 2]))
 centipede = Centipede(legs, rounds)
 agent0 = PassAgent()
-agent1 = PassAgent()
+agent1 = RLAgent(rounds, legs, Q)
+
+# learning rate
+alpha = 0.95
+
+# exploration rate
+gamma = 0.8
+
+agent1.set_alpha(alpha)
+agent1.set_gamma(gamma)
 
 # FUNCTIONS -----------------------------------------------
 
@@ -41,7 +55,7 @@ while current_round <= rounds:
     if last_round != current_round:
 
         # take into account the action in the last leg
-        if action == 'TAKE':
+        if action == take_action:
             history.append(last_leg)
         else:
             history.append(last_leg + 1)

@@ -1,7 +1,8 @@
 from Agent import Agent
+from Constants import take_action
 
 
 class TakeAgent(Agent):
 
     def decide(self, leg, round):
-        return 'TAKE'
+        return take_action
