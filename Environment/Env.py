@@ -11,7 +11,7 @@ current_round = 1
 history = []
 centipede = Centipede(legs, rounds)
 agent0 = PassAgent()
-agent1 = TakeAgent()
+agent1 = PassAgent()
 
 # FUNCTIONS -----------------------------------------------
 
@@ -39,7 +39,13 @@ while current_round <= rounds:
     # get the next state according to the current state and the action
     current_leg, current_round = centipede.get_next_state(current_leg, current_round, action)
     if last_round != current_round:
-        history.append(last_leg)
+
+        # take into account the action in the last leg
+        if action == 'TAKE':
+            history.append(last_leg)
+        else:
+            history.append(last_leg + 1)
+
         agent0.add_points(payoff_agent0)
         agent1.add_points(payoff_agent1)
         swap_starting_agent()
