@@ -32,6 +32,9 @@ class RLAgent(Agent):
     def set_gamma(self, gamma):
         self.gamma = gamma
 
+    def set_epsilon(self, epsilon):
+        self.epsilon = epsilon
+
     # this is the pai function
     def decide(self, leg, round):
         state_entry_index = round * self.num_legs + leg
@@ -74,8 +77,14 @@ class RLAgent(Agent):
         # Q'[s',a']
         max_value = self.Q[next_state_entry_index, max_index]
 
-        # Q[s,a] <-- (1 - alpha) * Q[s,a] + alpha * gamma * Q'[s',a']
-        self.Q[state_entry_index, action] = (1 - self.alpha) * self.Q[state_entry_index, action] + self.alpha * self.gamma * max_value
+        # Q[s,a] <-- (1 - alpha) * Q[s,a] + alpha * (reward + gamma * Q'[s',a'])
+        self.Q[state_entry_index, action] = (1 - self.alpha) * self.Q[state_entry_index, action] + self.alpha * (reward + self.gamma * max_value)
 
         # decay alpha
         self.alpha = self.alpha ** 2
+
+    # override
+    def print_state(self):
+        print(self.__class__.__name__, ' got: ', self._total_points)
+        print('Q matrix is:')
+        print(self.Q)

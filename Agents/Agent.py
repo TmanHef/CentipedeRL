@@ -13,3 +13,7 @@ class Agent:
 
     def print_state(self):
         print(self.__class__.__name__, ' got: ', self._total_points)
+
+    # for comfort (RLAgent overrides this)
+    def update(self, leg, round, action, next_leg, next_round, reward):
+        return
