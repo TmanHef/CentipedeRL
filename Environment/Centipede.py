@@ -1,4 +1,5 @@
 import numpy as np
+from Constants import take_action
 
 
 # a class modelling the game
@@ -28,7 +29,7 @@ class Centipede:
     def get_next_state(self, leg, round, action):
 
         # if TAKE was made or PASS was made in the last leg - return next round state
-        if action == 'TAKE' or leg == self.numOfLegs:
+        if action == take_action or leg == self.numOfLegs:
             return 1, round + 1
 
         else:

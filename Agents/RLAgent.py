@@ -7,9 +7,7 @@ class RLAgent(Agent):
     Q = None
     num_rounds = None
     num_legs = None
-    gamma = None
-    alpha = None
-    epsilon = None
+
 
     def __init__(self, rounds, legs, Q):
         Agent.__init__(self)
@@ -26,18 +24,11 @@ class RLAgent(Agent):
         # exploration rate
         self.epsilon = 0.4
 
-    def set_alpha(self, alpha):
-        self.alpha = alpha
 
-    def set_gamma(self, gamma):
-        self.gamma = gamma
 
-    def set_epsilon(self, epsilon):
-        self.epsilon = epsilon
-
-    # this is the pai function
+    # this is the pi function
     def decide(self, leg, round):
-        state_entry_index = round * self.num_legs + leg
+        state_entry_index = (round - 1) * self.num_legs + (leg - 1)
         action_index = np.where(self.Q[state_entry_index] == np.max(self.Q[state_entry_index]))[1]
 
         # choose according to policy
@@ -51,8 +42,7 @@ class RLAgent(Agent):
         else:
             max_index = np.random.random_integers(0, 1)
 
-        # decay epsilon
-        self.epsilon = self.epsilon * self.alpha
+        print('RL chose: ', max_index)
 
         return max_index
 
@@ -60,10 +50,10 @@ class RLAgent(Agent):
     def update(self, leg, round, action, next_leg, next_round, reward):
 
         # s
-        state_entry_index = round * self.num_legs + leg
+        state_entry_index = (round - 1) * self.num_legs + (leg - 1)
 
         # s'
-        next_state_entry_index = next_round * self.num_legs + next_leg
+        next_state_entry_index = (next_round - 1) * self.num_legs + (next_leg - 1)
 
         # will get a'
         max_index = np.where(self.Q[next_state_entry_index] == np.max(self.Q[next_state_entry_index]))[1]
@@ -77,14 +67,23 @@ class RLAgent(Agent):
         # Q'[s',a']
         max_value = self.Q[next_state_entry_index, max_index]
 
+        print('before: Q[', state_entry_index, ',', action, '] = ', self.Q[state_entry_index, action], ' alpha = ', self.alpha)
+
         # Q[s,a] <-- (1 - alpha) * Q[s,a] + alpha * (reward + gamma * Q'[s',a'])
         self.Q[state_entry_index, action] = (1 - self.alpha) * self.Q[state_entry_index, action] + self.alpha * (reward + self.gamma * max_value)
 
-        # decay alpha
-        self.alpha = self.alpha ** 2
+        print('after:  Q[', state_entry_index, ',', action, '] = ', self.Q[state_entry_index, action], ' alpha = ', self.alpha)
 
     # override
     def print_state(self):
         print(self.__class__.__name__, ' got: ', self._total_points)
         print('Q matrix is:')
         print(self.Q)
+
+    # override
+    def decay_alpha(self, factor):
+        self.alpha = 0.95 ** factor
+
+    # for comfort (RLAgent overrides this)
+    def decay_epsilon(self, factor):
+        self.epsilon = 0.95 ** factor
