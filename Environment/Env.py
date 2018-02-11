@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 # SETUP ---------------------------------------------------
 
-training_games = 10
+training_games = 100
 legs = 10
 rounds = 10
 current_leg = 1
@@ -69,8 +69,8 @@ def reset_game(game):
     agent1.reset_points()
     agent0.decay_alpha(game)
     agent1.decay_alpha(game)
-    agent0.decay_epsilon(game)
-    agent1.decay_epsilon(game)
+    #agent0.decay_epsilon(game)
+    #agent1.decay_epsilon(game)
     if np.random.random() > 0.5:
         swap_starting_agent()
 
@@ -119,7 +119,7 @@ def run_game():
             swap_starting_agent()
 
 # TRAINING ------------------------------------------------
-for game in range(1, training_games):
+for game in range(0, training_games):
     print('game: ', game)
     run_game()
     if game < training_games:
@@ -131,7 +131,7 @@ for game in range(1, training_games):
 agent0.print_state()
 agent1.print_state()
 
-X = range(1, (rounds - 1) * legs + 1)
+X = range(1, rounds * training_games + 1)
 plt.plot(X, history)
 plt.axis([1, rounds * training_games, 1, legs + 1])
 plt.show()
