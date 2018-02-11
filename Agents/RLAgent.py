@@ -32,7 +32,7 @@ class RLAgent(Agent):
         action_index = np.where(self.Q[state_entry_index] == np.max(self.Q[state_entry_index]))[1]
 
         # choose according to policy
-        if np.random.random() > self. epsilon:
+        if np.random.random() > self.epsilon:
             # check if there is more than one action possible
             if action_index.shape[0] > 1:
                 max_index = int(np.random.choice(action_index, size = 1))

@@ -4,11 +4,12 @@ from Agents.TakeAgent import TakeAgent
 from Agents.RLAgent import RLAgent
 from Constants import take_action
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 # SETUP ---------------------------------------------------
 
-training_games = 100
+training_games = 10
 legs = 10
 rounds = 10
 current_leg = 1
@@ -80,29 +81,30 @@ def run_game():
     global legs
     global agent0
     global agent1
-    while current_round < rounds - 1:
+    while current_round <= rounds:
         payoff_agent0 = centipede.get_payoff_player0(current_leg)
         payoff_agent1 = centipede.get_payoff_player1(current_leg)
         last_round = current_round
         last_leg = current_leg
         agent0_turn = (current_leg % 2) != 0
 
-        if not agent0_turn:
-            action = agent1.decide(current_leg, current_round)
-
-        else:
+        if agent0_turn:
             action = agent0.decide(current_leg, current_round)
+        else:
+            action = agent1.decide(current_leg, current_round)
 
         # get the next state according to the current state and the action
         current_leg, current_round = centipede.get_next_state(current_leg, current_round, action)
 
-        # update the Q matrix of the agent that acted
-        if not agent0_turn:
-            reward1 = calculate_reward(action, last_leg, False)
-            agent1.update(last_leg, last_round, action, current_leg, current_round, reward1)
-        else:
-            reward0 = calculate_reward(action,last_leg, True)
-            agent0.update(last_leg, last_round, action, current_leg, current_round, reward0)
+        if current_round < rounds:
+
+            # update the Q matrix of the agent that acted
+            if agent0_turn:
+                reward0 = calculate_reward(action, last_leg, True)
+                agent0.update(last_leg, last_round, action, current_leg, current_round, reward0)
+            else:
+                reward1 = calculate_reward(action, last_leg, False)
+                agent1.update(last_leg, last_round, action, current_leg, current_round, reward1)
 
         if last_round != current_round:
 
@@ -120,7 +122,7 @@ def run_game():
 for game in range(1, training_games):
     print('game: ', game)
     run_game()
-    if game < training_games - 1:
+    if game < training_games:
         reset_game(game)
 
 
@@ -128,4 +130,8 @@ for game in range(1, training_games):
 
 agent0.print_state()
 agent1.print_state()
-#print('history: ', history)
+
+X = range(1, (rounds - 1) * legs + 1)
+plt.plot(X, history)
+plt.axis([1, rounds * training_games, 1, legs + 1])
+plt.show()
