@@ -1,5 +1,6 @@
 from Agent import Agent
 import numpy as np
+from Constants import pass_action
 
 
 class RLAgent(Agent):
@@ -7,12 +8,14 @@ class RLAgent(Agent):
     Q = None
     num_rounds = None
     num_legs = None
+    num_of_pass = None
 
 
     def __init__(self, rounds, legs, Q):
         Agent.__init__(self)
         self.num_rounds = rounds
         self.num_legs = legs
+        self.num_of_pass = 0
         self.Q = Q
 
         # discount factor
@@ -42,7 +45,10 @@ class RLAgent(Agent):
         else:
             max_index = np.random.random_integers(0, 1)
 
-        print('RL chose: ', max_index)
+        #print('RL chose: ', max_index)
+
+        if max_index == pass_action:
+            self.num_of_pass += 1
 
         return max_index
 
@@ -51,6 +57,9 @@ class RLAgent(Agent):
 
         # s
         state_entry_index = (round - 1) * self.num_legs + (leg - 1)
+
+        if (state_entry_index == 92) or (state_entry_index == 94) or (state_entry_index == 96):
+            print('hiii')
 
         # s'
         next_state_entry_index = (next_round - 1) * self.num_legs + (next_leg - 1)
@@ -87,3 +96,6 @@ class RLAgent(Agent):
     # for comfort (RLAgent overrides this)
     def decay_epsilon(self, factor):
         self.epsilon = 0.95 ** factor
+
+    def new_game_reset(self):
+        self.num_of_pass = 0

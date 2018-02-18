@@ -1,2 +1,2 @@
 # CentipedeRL
-A Reinforcement Learning agent for the Centipede Game 
+A Reinforcement Learning agent for the **Centipede Game**
