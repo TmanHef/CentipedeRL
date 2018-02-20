@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 # SETUP ---------------------------------------------------
 
-training_games = 5000
+training_games = 10000
 legs = 10
 rounds = 10
 
@@ -35,7 +35,7 @@ alpha = 0.999
 gamma = 0.85
 
 # exploration rate
-epsilon = 0.09
+epsilon = 0.15
 
 rl_agent.set_alpha(alpha)
 rl_agent.set_gamma(gamma)
@@ -60,7 +60,6 @@ def reset_game(game):
     sum_off_pass = 0
 
     rl_agent.set_alpha(alpha ** (1 + (0.2 * game)))
-    #rl_agent.set_epsilon(epsilon ** (1 + (0.1 * game)))
 
     centipede.reset_game()
     current_leg, current_round = centipede.get_first_state()
@@ -90,8 +89,6 @@ def run_game():
         current_leg, current_round = centipede.get_next_state(current_leg, current_round, action)
 
         if current_round <= rounds:
-            if current_round == rounds:
-                print('hi')
 
             # update the Q matrix of the agent
             rl_agent.update(last_leg, last_round, action, current_leg, current_round, reward)
@@ -103,15 +100,14 @@ def run_game():
 
 
 for game in range(0, training_games):
-    #print('game: ', game)
+    print('game: ', game)
     run_game()
     if game <= training_games:
         reset_game(game)
 
 
 # RESULTS ------------------------------------------------
-
+print('alpha = ', rl_agent.alpha)
 rl_agent.print_state()
-# plt.figure(None, (7, 2.5), 500)
 plt.plot(APPG)
 plt.show()

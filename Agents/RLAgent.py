@@ -58,7 +58,7 @@ class RLAgent(Agent):
         # s
         state_entry_index = (round - 1) * self.num_legs + (leg - 1)
 
-        if (state_entry_index == 92) or (state_entry_index == 94) or (state_entry_index == 96):
+        if (state_entry_index == 90):
             print('hiii')
 
         # s'
@@ -76,12 +76,12 @@ class RLAgent(Agent):
         # Q'[s',a']
         max_value = self.Q[next_state_entry_index, max_index]
 
-        print('before: Q[', state_entry_index, ',', action, '] = ', self.Q[state_entry_index, action], ' alpha = ', self.alpha)
+        #print('before: Q[', state_entry_index, ',', action, '] = ', self.Q[state_entry_index, action], ' alpha = ', self.alpha)
 
         # Q[s,a] <-- (1 - alpha) * Q[s,a] + alpha * (reward + gamma * Q'[s',a'])
         self.Q[state_entry_index, action] = (1 - self.alpha) * self.Q[state_entry_index, action] + self.alpha * (reward + self.gamma * max_value)
 
-        print('after:  Q[', state_entry_index, ',', action, '] = ', self.Q[state_entry_index, action], ' alpha = ', self.alpha)
+        #print('after:  Q[', state_entry_index, ',', action, '] = ', self.Q[state_entry_index, action], ' alpha = ', self.alpha)
 
     # override
     def print_state(self):

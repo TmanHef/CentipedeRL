@@ -48,12 +48,22 @@ class Centipede:
         if new_round == round:
             # env agent makes a choice and learning agent gets next state
             env_action = self.agent.decide(new_leg, new_round)
+            round_before_env_action = new_round
 
-            # return the state for learning agent
-            return self._next_state_helper(new_leg, new_round, env_action)
+            # get the next state according to env agent action
+            new_leg, new_round = self._next_state_helper(new_leg, new_round, env_action)
+
+            # the env agent might cause a new round to start - need to check if he starts in that round
+            # if it is a new round AND the env agent needs to start - let him start
+            if (new_round != round_before_env_action) and self.env_agent_starts:
+                env_action = self.agent.decide(new_leg, new_round)
+                return self._next_state_helper(new_leg, new_round, env_action)
+
+            # else return the state to rl agent
+            return new_leg, new_round
+
 
         # else it is a new round
-
         # new round starting and it's the env agent's turn to start
         if self.env_agent_starts:
 
