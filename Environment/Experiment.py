@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 # SETUP ---------------------------------------------------
 
-training_games = 10000
+training_games = 50000
 legs = 10
 rounds = 10
 
@@ -32,10 +32,10 @@ current_leg, current_round = centipede.get_first_state()
 alpha = 0.999
 
 # discount factor
-gamma = 0.85
+gamma = 0.9
 
 # exploration rate
-epsilon = 0.15
+epsilon = 0.8
 
 rl_agent.set_alpha(alpha)
 rl_agent.set_gamma(gamma)
@@ -60,6 +60,7 @@ def reset_game(game):
     sum_off_pass = 0
 
     rl_agent.set_alpha(alpha ** (1 + (0.2 * game)))
+    rl_agent.set_epsilon(epsilon ** (1 + (0.01 * game)))
 
     centipede.reset_game()
     current_leg, current_round = centipede.get_first_state()
@@ -108,6 +109,7 @@ for game in range(0, training_games):
 
 # RESULTS ------------------------------------------------
 print('alpha = ', rl_agent.alpha)
+print('epsilon = ', rl_agent.epsilon)
 rl_agent.print_state()
 plt.plot(APPG)
 plt.show()

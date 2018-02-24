@@ -45,8 +45,6 @@ class RLAgent(Agent):
         else:
             max_index = np.random.random_integers(0, 1)
 
-        #print('RL chose: ', max_index)
-
         if max_index == pass_action:
             self.num_of_pass += 1
 
@@ -57,9 +55,6 @@ class RLAgent(Agent):
 
         # s
         state_entry_index = (round - 1) * self.num_legs + (leg - 1)
-
-        if (state_entry_index == 90):
-            print('hiii')
 
         # s'
         next_state_entry_index = (next_round - 1) * self.num_legs + (next_leg - 1)
