@@ -8,6 +8,10 @@ class Centipede:
     numOfRounds = None
     agent = None
     env_agent_starts = None
+
+    # will store the last state the env agent was in - [leg, round, action]
+    last_env_state = None
+
     last_leg = None
     legs_history = None
 
@@ -24,6 +28,9 @@ class Centipede:
         self.last_leg = 1
         self.legs_history = []
 
+        for i in range(0, rounds):
+            self.legs_history.append([])
+
         # legs + 1 to support pass action on last leg
         self.payoffs = np.matrix(np.zeros((2, legs + 1)))
         for i in range(0, legs + 1):
@@ -35,10 +42,21 @@ class Centipede:
                 self.payoffs[0, i] = 2 ** (i + 2)
 
     def get_first_state(self):
-        if self.env_agent_starts:
-            env_action = self.agent.decide(1, 1)
-            return self._next_state_helper(1, 1, env_action)
+        # if self.env_agent_starts:
+        #     env_action = self.agent.decide(1, 1)
+        #     return self._next_state_helper(1, 1, env_action)
         return 1, 1
+
+
+    def _update_env_Q(self, next_leg, next_round):
+        last_env_leg = self.last_env_state[0]
+        last_env_round = self.last_env_state[1]
+        last_env_action = self.last_env_state[2]
+
+        # calculate the reward for the last action
+        reward = self._calculate_reward_internal(last_env_action, last_env_leg)
+
+        self.agent.update(last_env_leg, last_env_round, last_env_action, next_leg, next_round, reward)
 
     def get_next_state(self, leg, round, action):
 
@@ -48,6 +66,14 @@ class Centipede:
         if new_round == round:
             # env agent makes a choice and learning agent gets next state
             env_action = self.agent.decide(new_leg, new_round)
+
+            # if this is not the first decide the agent does - need to update the Q matrix
+            if self.last_env_state is not None:
+                self._update_env_Q(new_leg, new_round)
+
+            # now it's safe to update the last env state
+            self.last_env_state = [new_leg, new_round, env_action]
+
             round_before_env_action = new_round
 
             # get the next state according to env agent action
@@ -57,6 +83,14 @@ class Centipede:
             # if it is a new round AND the env agent needs to start - let him start
             if (new_round != round_before_env_action) and self.env_agent_starts:
                 env_action = self.agent.decide(new_leg, new_round)
+
+                # if this is not the first decide the agent does - need to update the Q matrix
+                if self.last_env_state is not None:
+                    self._update_env_Q(new_leg, new_round)
+
+                # now it's safe to update the last env state
+                self.last_env_state = [new_leg, new_round, env_action]
+
                 return self._next_state_helper(new_leg, new_round, env_action)
 
             # else return the state to rl agent
@@ -70,6 +104,13 @@ class Centipede:
             # env agent makes a choice and learning agent gets next state
             env_action = self.agent.decide(new_leg, new_round)
 
+            # if this is not the first decide the agent does - need to update the Q matrix
+            if self.last_env_state is not None:
+                self._update_env_Q(new_leg, new_round)
+
+            # now it's safe to update the last env state
+            self.last_env_state = [new_leg, new_round, env_action]
+
             # return the state for learning agent
             return self._next_state_helper(new_leg, new_round, env_action)
         else:
@@ -80,7 +121,7 @@ class Centipede:
         if action == take_action or leg == self.numOfLegs:
 
             # a round ended
-            self.legs_history.append(leg)
+            self.legs_history[round - 1].append(leg)
             self.env_agent_starts = not self.env_agent_starts
             return 1, round + 1
 
@@ -100,6 +141,18 @@ class Centipede:
         # if env agent didn't start, external did
         return self._get_payoff(reward_leg, not self.env_agent_starts)
 
+    # assumes only internal call
+    def _calculate_reward_internal(self, action, leg):
+        # reward for take is the payoff
+        if action == take_action:
+            reward_leg = leg
+
+        # reward for pass is the payoff of the next leg
+        else:
+            reward_leg = leg + 1
+
+        return self._get_payoff(reward_leg, self.env_agent_starts)
+
     def _get_payoff(self, leg, did_start):
         if did_start:
             return self.payoffs[0, leg - 1]
@@ -113,9 +166,6 @@ class Centipede:
 
     def reset_game(self):
         self.last_leg = 1
-        self.legs_history = []
         self.env_agent_starts = False
-        # if np.random.random() > 0.5:
-        #     self.env_agent_starts = True
-        # else:
-        #     self.env_agent_starts = False
+        self.last_env_state = None
+

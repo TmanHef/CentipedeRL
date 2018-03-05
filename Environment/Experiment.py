@@ -1,6 +1,7 @@
 from CentipedeEnv import Centipede
 from Agents.PassAgent import PassAgent
 from Agents.TakeAgent import TakeAgent
+from Agents.AmbivalentAgent import AmbivalentAgent
 from Agents.RLAgent import RLAgent
 from Constants import pass_action
 import numpy as np
@@ -9,24 +10,20 @@ import matplotlib.pyplot as plt
 
 # SETUP ---------------------------------------------------
 
-training_games = 50000
+training_games = 10000
 legs = 10
 rounds = 10
 
-# Amount of Pass Per Game
-APPG = []
-sum_off_pass = 0
+Q1 = np.random.random_sample([rounds * legs, 2]) * 10
+Q1 = np.matrix(Q1)
 
-# Q = np.random.random_sample([rounds * legs, 2]) * 10
-# Q = np.matrix(Q)
+Q2 = np.random.random_sample([rounds * legs, 2]) * 10
+Q2 = np.matrix(Q2)
 
-Q = np.matrix(np.zeros([rounds * legs, 2]))
 print('initial Q:')
-print(Q)
-pass_agent = PassAgent()
-rl_agent = RLAgent(rounds, legs, Q)
-centipede = Centipede(legs, rounds, pass_agent)
-current_leg, current_round = centipede.get_first_state()
+print(Q1)
+agent = RLAgent(rounds, legs, Q1)
+rl_agent = RLAgent(rounds, legs, Q2)
 
 # learning rate
 alpha = 0.999
@@ -41,26 +38,40 @@ rl_agent.set_alpha(alpha)
 rl_agent.set_gamma(gamma)
 rl_agent.set_epsilon(epsilon)
 
+agent.set_alpha(alpha)
+agent.set_gamma(gamma)
+agent.set_epsilon(epsilon)
+
+centipede = Centipede(legs, rounds, agent)
+current_leg, current_round = centipede.get_first_state()
+
+
 # FUNCTIONS -----------------------------------------------
 
 
 def reset_game(game):
     global current_round
     global current_leg
-    global pass_agent
+    global agent
     global rl_agent
     global sum_off_pass
     global APPG
     global alpha
     global epsilon
-    pass_agent.reset_points()
+    agent.reset_points()
     rl_agent.reset_points()
 
-    APPG.append(sum_off_pass)
-    sum_off_pass = 0
+    # APPG.append(sum_off_pass)
+    # sum_off_pass = 0
 
     rl_agent.set_alpha(alpha ** (1 + (0.2 * game)))
     rl_agent.set_epsilon(epsilon ** (1 + (0.01 * game)))
+
+    centipede.agent.set_alpha(alpha ** (1 + (0.2 * game)))
+    centipede.agent.set_epsilon(epsilon ** (1 + (0.01 * game)))
+
+    rl_agent.new_game_reset()
+    centipede.agent.new_game_reset()
 
     centipede.reset_game()
     current_leg, current_round = centipede.get_first_state()
@@ -79,9 +90,6 @@ def run_game():
         last_leg = current_leg
         rl_payoff = centipede.get_payoff(current_leg)
         action = rl_agent.decide(current_leg, current_round)
-
-        if action == pass_action:
-            sum_off_pass += 1
 
         # has to be calculated before get_next_state - because of the starting agent boolean in reward calc
         reward = centipede.calculate_reward(action, last_leg)
@@ -111,5 +119,21 @@ for game in range(0, training_games):
 print('alpha = ', rl_agent.alpha)
 print('epsilon = ', rl_agent.epsilon)
 rl_agent.print_state()
-plt.plot(APPG)
-plt.show()
+plt.figure(1)
+plt.ylabel('# of PASS actions taken per game')
+plt.xlabel('# of training game')
+plt.plot(rl_agent.pass_per_game)
+plt.savefig('Output/APPG1.png')
+
+plt.figure(2)
+plt.ylabel('# of PASS actions taken per game')
+plt.xlabel('# of training game')
+plt.plot(centipede.agent.pass_per_game)
+plt.savefig('Output/APPG2.png')
+
+for i in range(0, rounds):
+    plt.figure(i + 3)
+    plt.ylabel('Round ' + str(i + 1) + ' Finished on Leg')
+    plt.xlabel('# of training game')
+    plt.plot(centipede.legs_history[i])
+    plt.savefig('Output/RFL' + str(i + 1) + '.png')

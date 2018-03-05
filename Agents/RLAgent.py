@@ -9,6 +9,7 @@ class RLAgent(Agent):
     num_rounds = None
     num_legs = None
     num_of_pass = None
+    pass_per_game = None
 
 
     def __init__(self, rounds, legs, Q):
@@ -16,6 +17,7 @@ class RLAgent(Agent):
         self.num_rounds = rounds
         self.num_legs = legs
         self.num_of_pass = 0
+        self.pass_per_game = []
         self.Q = Q
 
         # discount factor
@@ -93,4 +95,5 @@ class RLAgent(Agent):
         self.epsilon = 0.95 ** factor
 
     def new_game_reset(self):
+        self.pass_per_game.append(self.num_of_pass)
         self.num_of_pass = 0

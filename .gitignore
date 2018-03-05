@@ -1,4 +1,7 @@
 .idea
+.DS_Store
+Environment/.DS_Store
+Environment/Output
 Agents/__pycache__/
 Environment/__pycache__/
 __pycache__/
