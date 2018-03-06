@@ -23,16 +23,17 @@ Q2 = np.matrix(Q2)
 print('initial Q:')
 print(Q1)
 agent = RLAgent(rounds, legs, Q1)
+# agent = AmbivalentAgent()
 rl_agent = RLAgent(rounds, legs, Q2)
 
 # learning rate
 alpha = 0.999
 
 # discount factor
-gamma = 0.9
+gamma = 0.4
 
 # exploration rate
-epsilon = 0.8
+epsilon = 0.9
 
 rl_agent.set_alpha(alpha)
 rl_agent.set_gamma(gamma)
